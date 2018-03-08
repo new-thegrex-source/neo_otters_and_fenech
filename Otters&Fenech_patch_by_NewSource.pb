@@ -1,4 +1,19 @@
+;-----------------------------------ОПТИМИЗАЦИЯ
+;-Console Launcher
 
+
+  Procedure.s CharToOem(String.s)
+  CharToOem_(@String, @String)
+  ProcedureReturn String
+EndProcedure
+ 
+Procedure.s OemToChar(String.s)
+  OemToChar_(@String, @String)
+  ProcedureReturn String
+EndProcedure
+
+
+;-------НОРМАЛЬНЫЙ ЛАУНЧЕР
 
 
 If InitSprite() = 0 Or InitKeyboard() = 0 Or InitMouse() = 0  Or InitSprite3D() = 0
@@ -11,31 +26,356 @@ EndIf
   
   xyraz=0
   
-lang=1
-      
+lang=0
 
-
+    
+If CountProgramParameters() = 3
+  Select ProgramParameter()
+    Case "DEV"
+     
+       If OpenConsole ()
   
-  If OpenWindow(0, 0, 0, 600, 550, "Otters & Fennech", #PB_Window_SystemMenu | #PB_Window_SizeGadget | #PB_Window_ScreenCentered |#PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget)
+  
+    ConsoleTitle ("DEBUG")
+  
+;lEnableExplicit
+  ; Define the constants:
+  #MAXBYTE = 255
+  #MAXLONG = 2147483647
+  
+  
+    ConsoleColor(12,0)  
+    ConsoleLocate (18,12)                          ; x y position 
+    PrintN ("That is debug area!")
+    
+    Print ("Press anykey to exit")
+    
+    Print("Press any key to continue...")
+Input()
+PrintN("pressed...")
+Input()                     ; to avoid immediate close
+CloseConsole()
+    
+  EndIf
+    Default
+      PrintN("Wrong parametres...")
+  EndSelect
+ 
+EndIf
 
-    ButtonGadget(1, 10,  10, 100, 25, "Menu")
-  ButtonGadget(2, 120,  10, 100, 25, "Resolution")
-  ButtonGadget(3, 230,  10, 100, 25, "Play")
-  ButtonGadget(4, 340,  10, 100, 25, "English")
-  ButtonGadget(5, 450,  10, 100, 25, "Exit")
+If ReadFile(0, "work/mods.dat")
+
+  MO$ =  Trim(ReadString(0))
+
+  mods = Val(MO$)
+  
+
+Else
+mods=0
+cmod=0
+EndIf
+
+If mods=1
+
+If ReadFile(0, "work/currentmod.dat")
+
+  MORE$ = Trim(ReadString(0))
+
+EndIf
+EndIf
+
+If ReadFile(0, "mods/"+MORE$+"/permission.dat")
+
+  CM$ =  Trim(ReadString(0))
+  UM$ =  Trim(ReadString(0))
+  SM$ =  Trim(ReadString(0))
+
+  cmods = Val(CM$)
+  umods = Val(UM$)
+  smods = Val(SM$)
+  
+
+Else
+cmods=0
+smod=0
+EndIf
+
+If ReadFile(0, "work/lang.dat")
+  ZZZM$ =  Trim(ReadString(0))
+  LANGUAGE$ = ZZZM$
+Else
+LANGUAGE$ = "EN"
+EndIf  
+  
+;Else
+
+If ReadFile(0, "work/videomode.dat")
+
+  X$ =  Trim(ReadString(0))
+  Y$ =  Trim(ReadString(0))
+  F$ =  Trim(ReadString(0))
+
+  ResX = Val(X$)
+  ResY = Val(Y$)
+  FPS = Val(F$)
+  
+Else
+
+  If OpenConsole ()
+  
+  
+    ConsoleTitle ("FirstRun/"+CharToOem("Первый запуск"))
+  
+;lEnableExplicit
+  ; Define the constants:
+  #MAXBYTE = 255
+  #MAXLONG = 2147483647
+  
+  ;->Cyrillic support for console
+  
 
 
+    
 
+    ConsoleColor(7,0)  
+    ConsoleLocate (18,12)  
+    
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("SELECT LANGUAGE/"+CharToOem("ВЫБЕРИТЕ ЯЗЫК"))           ; Ask for name
+    PrintN ("===================================") 
+    PrintN ("") 
+    PrintN ("1.English") 
+    PrintN (CharToOem("2.Русский")) 
+    PrintN ("") 
+    PrintN ("Input number of lang/"+CharToOem("Введите номер языка")) 
+    CONLANG = Val(Input())
+    
+    If CONLANG=2
+      conru=1
+      LANGUAGE$ = "RU"
+    Else
+      conru=0
+      LANGUAGE$ = "EN"
+    EndIf
+    
+    If CreateFile(0, "work/language.dat")
+      WriteString(0, LANGUAGE$)
+    EndIf
+    
+    ClearConsole()
+    If conru=1
+    PrintN ("===================================")           ; Ask for name
+    PrintN (CharToOem("ШАГ 1 ИЗ 3")) 
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")  
+    PrintN (CharToOem("Так как это первый запуск, вы должны")) 
+    PrintN (CharToOem("настроить разрешения экрана, в котором"))  
+    PrintN (CharToOem("будет работать игра."))  
+    PrintN ("")                         ; x y position 
+    PrintN (CharToOem("Этот процесс разбит на 2 этапа")) 
+    PrintN (CharToOem("Введите по очерёдно ширину и высоту")) 
+    PrintN ("")                         ; x y position 
+    Print (CharToOem("Введите ширину (1280 к примеру):")) 
+    Else
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("STEP 1 OF 3")           ; Ask for name
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")  
+    PrintN ("Since it's first run, you have to configure")  
+    PrintN ("Resolution of game window")  
+    PrintN ("")                         ; x y position 
+    PrintN ("This process is split'd to 2 steps:")                         ; x y position 
+    PrintN ("Entering width and height")                         ; x y position 
+    PrintN ("")                         ; x y position 
+    Print ("Please enter your Width (e.g 1280):  ")           ; Ask for name
+    EndIf
+    ResX = Val(Input())                              ; Wait for user input
 
+    ClearConsole() 
+    If conru=1
+    PrintN ("===================================")           ; Ask for name
+    PrintN (CharToOem("ШАГ 2 ИЗ 3")) 
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")  
+    PrintN (CharToOem("Теперь вам нужно ввести высоту")) 
+    PrintN ("")  
+    Print (CharToOem("Введите высоту (720 к примеру):")) 
+    Else
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("STEP 2 OF 3") 
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")  
+    PrintN ("Now input the height.") 
+    PrintN ("")  
+    Print ("Please enter your Width (e.g 720):  ") 
+    EndIf
+    ResY = Val(Input())
+    
+    ClearConsole()
+    PrintN ("===================================")           ; Ask for name
+    If conru=1
+    PrintN (CharToOem("ШАГ 3 ИЗ 3"))         ; Ask for name
+    Else
+    PrintN ("STEP 3 OF 3")           ; Ask for name
+  EndIf
+  If conru=1
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")           ; Ask for name
+    PrintN (CharToOem("Установите ограничение FPS")) 
+    PrintN ("")          ; Ask for name
+    PrintN (CharToOem("Количество кадров в секунду НАПРЯМУЮ влияет на скорость игры!!!"))           ; Ask for name
+    PrintN (CharToOem("Кол-во кадров оригинальной игры 35"))           ; Ask for name
+    PrintN (CharToOem("Мы рекомендуем установить это значение на 60."))        ; Ask for name 
+    PrintN ("")         ; Ask for name
+    Print (CharToOem("Введите значение максимального FPS (к примеру 30 или 60):")) 
+    Else
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("")           ; Ask for name
+    PrintN ("Set up the maximum FPS value")  
+    PrintN ("")          ; Ask for name
+    PrintN ("The target Frame rate is dirrecly affects game speed!!!")           ; Ask for name
+    PrintN ("The Frame Rate of Vanilia game is 35")           ; Ask for name
+    PrintN ("We will recommend you set 60. ")           ; Ask for name
+    PrintN ("")         ; Ask for name
+    Print ("Please enter FPS limit value (e.g 30 or 60):   ")     
+    EndIf; Ask for name
+    FPS = Val(Input())
+    
+    ClearConsole() 
+    If conru=1
+    Print (CharToOem("Сохранить данное разрешение? [yes/no]: "))  
+    Else
+    Print ("Save this resolution? [yes/no]:   ")
+    EndIf
+    Sub123$ = Input()
+    
+    
+    If Sub123$ = "yes"
+      If CreateFile(0, "work/videomode.dat")
+        WriteStringN(0, Str(ResX))
+        WriteStringN(0, Str(ResY))
+        WriteString(0, Str(FPS))
 
+        ClearConsole()
+    PrintN ("===================================")           ; Ask for name
+    If conru=1
+    PrintN (CharToOem("ГОТОВО"))  
+    Else
+    PrintN ("DONE")           ; Ask for name
+    EndIf
+    PrintN ("===================================")      
+    PrintN ("")
+    If conru=1
+      PrintN ("Video mode "+Str(ResX)+"x"+Str(ResY)+" is saved at file work/videomode.dat" )
+        PrintN (CharToOem("Видеорежим") +Str(ResX)+"x"+Str(ResY)+CharToOem("Сохранён в файл work/videomode.dat")) 
+        PrintN ("")
+        PrintN (CharToOem("Если вы хотите удалить это разрешение, то удалите этот файл."))
+        PrintN (CharToOem("Так же, если вам потребуется, вы можете изменить разрешение и FPS напрямую, изменив"))
+        PrintN (CharToOem("Значения в файле (Его можно открыть блокнотом)"))
+        PrintN ("")
+        PrintN ("Нажмите Enter что бы запустить игру")
+      Else
+        PrintN ("Video mode "+Str(ResX)+"x"+Str(ResY)+" is saved at file work/videomode.dat" )
+        PrintN ("")
+        PrintN ("If you wish to remove auto resolution, just remove that file.")
+        PrintN ("Also, you can change resolution directly in file, via any notepad.")
+        PrintN ("")
+        PrintN ("Press Enter for launch game")
+        
+        Input()
+    EndIf 
+        CloseFile(0)
+        Else
+            MessageRequester("PureBasic", "Error: can't write the file", 0)
+        End
+     EndIf
+    Else
+    
+    
+      
+   ; ClearConsole()  
+   ; Print ("Save Changes?:   ")
+   ; SaveQestion$=Input()
+    
+    ;If SaveQestion = y()
+    
+  ; Define some variables.
+       ;Define.f Float
+      ; Define.l Count, File
+     ;  Define.s Folder, FileName, String
+  
+  ; Create a temporary file name.
+       ;Folder = GetCurrentDirectory()
+       ;FileName = Folder + "autoexec.cfg"  
+    
+       ;File = CreateFile(#PB_Any, FileName)
+       
+       ;'....to be continued'
+    ClearConsole()  
+    PrintN ("===================================")           ; Ask for name
+    PrintN ("DONE")           ; Ask for name
+    PrintN ("===================================")      
+    PrintN ("")
+        PrintN ("")
+         PrintN ("")
+        PrintN ("Press Enter for launch game")
+        
+        Input()
+       
+     CloseConsole()
+    EndIf
+  EndIf
+  
+ EndIf
+  
+;-..
+;-If OpenWindow_START
+;  If OpenWindow(0, 0, 0, 1280, 720, "Otters & Fennech", #PB_Window_SystemMenu | #PB_Window_SizeGadget | #PB_Window_ScreenCentered |#PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget)
+ ; If OpenWindow(0, 0, 0, ResX, ResY, "Otters & Fennech", #PB_Window_SystemMenu | #PB_Window_SizeGadget | #PB_Window_ScreenCentered |#PB_Window_MinimizeGadget | #PB_Window_MaximizeGadget | #Flags )
+  If OpenWindow(0, 0, 0, ResX, ResY, "Otters & Fennech", #PB_Window_SystemMenu | #PB_Window_SizeGadget |#PB_Window_MinimizeGadget | #PB_Window_WindowCentered | #PB_Window_MaximizeGadget )
+    
+    ;If LoadLibrary(0, "lang_"+LANGUAGE$+".DLL")
+    ;If OpenLibrary(0, "lang_RU.DLL")
+      ;If CallFunctionFast(0, MenuNames) 
+      ;  TMENU$ = MENU$  
+     ; EndIf
+     ; EndIf
+     
+If ReadFile(0, "work/localizations/"+LANGUAGE$+"/MenuNames.lang")
+
+  MENU$ = Trim(ReadString(0))
+  ZOOM$ = Trim(ReadString(0))
+  PLAY$ = Trim(ReadString(0))
+  LANG$ = Trim(ReadString(0))
+  EXIT$ = Trim(ReadString(0))
+  MODS$ = Trim(ReadString(0))
+  YES$ = Trim(ReadString(0))
+  NO$ = Trim(ReadString(0))
+  ENDTURN$ = Trim(ReadString(0))
+  STARTGAME$  = Trim(ReadString(0))
+  WINCON$  = Trim(ReadString(0))
+  ARTIFACTS$  = Trim(ReadString(0))
+  NC$  = Trim(ReadString(0))
+  COM$  = Trim(ReadString(0))
+  RESET$  = Trim(ReadString(0))
+
+EndIf
+
+    ButtonGadget(1, 10,  10, 100, 25, MENU$)
+    ;ButtonGadget(1, 10,  10, 100, 25, "Меню")
+  ButtonGadget(2, 120,  10, 100, 25, ZOOM$)
+  ButtonGadget(3, 230,  10, 100, 25, PLAY$)
+ ; ButtonGadget(4, 340,  10, 100, 25, LANG$)
+  ButtonGadget(5, 340,  10, 100, 25, EXIT$)
+  ButtonGadget(6, 450,  10, 300, 25, MODS$)
   ;
   ; This is the 'event loop'. All the user actions are processed here.
   ; It's very easy to understand: when an action occurs, the EventID
   ; isn't 0 and we just have to see what have happened...
   ;
 
-  xraz=600
-  yraz=486
+  xraz=1280
+  yraz=720
   ; xraz=800
   ;yraz=600
    ; xraz=952
@@ -65,39 +405,66 @@ If RegOpenKeyEx_(#HKEY_CURRENT_USER, Reg_Path, #Null, #KEY_ALL_ACCESS, @hkey) = 
   
 EndIf 
 
+;-.
+;-..
+;-.
+
+
 
 
 If keyvalue>96
- LoadFont (0, "Arial", 8,#PB_Font_Bold)            ; Load Courrier Font, Size 15
- LoadFont (1, "Arial", 12,#PB_Font_Bold)              ; Load Arial Font, Size 30
- LoadFont (2, "Arial", 7) 
- LoadFont (3, "Arial", 10,#PB_Font_Bold)  
-  LoadFont (4, "Arial", 7,#PB_Font_Bold) 
+ LoadFont (0, "Times New Roman", 8,#PB_Font_Bold)            ; Load Courrier Font, Size 15
+ LoadFont (1, "Times New Roman", 12,#PB_Font_Bold)              ; Load Arial Font, Size 30
+ LoadFont (2, "Times New Roman", 7) 
+ LoadFont (3, "Times New Roman", 10,#PB_Font_Bold)  
+  LoadFont (4, "Times New Roman", 7,#PB_Font_Bold) 
 
 Else
   
-  LoadFont (0, "Arial", 10,#PB_Font_Bold)            ; Load Courrier Font, Size 15
-  LoadFont (1, "Arial", 15,#PB_Font_Bold)              ; Load Arial Font, Size 30
-  LoadFont (2, "Arial", 8) 
-  LoadFont (3, "Arial", 12,#PB_Font_Bold)  
-    LoadFont (4, "Arial", 8,#PB_Font_Bold) 
+  LoadFont (0, "Times New Roman", 10,#PB_Font_Bold)            ; Load Courrier Font, Size 15
+  LoadFont (1, "Times New Roman", 15,#PB_Font_Bold)              ; Load Arial Font, Size 30
+  LoadFont (2, "Times New Roman", 8) 
+  LoadFont (3, "Times New Roman", 12,#PB_Font_Bold)  
+    LoadFont (4, "Times New Roman", 8,#PB_Font_Bold) 
   
 EndIf 
+
+;---OLD_F_LOAD_IS_HERE_START
+
+If mods=1 And smods=1 And ReadFile(0, "mods/"+MORE$+"/SMoD/fireloud.wav")
+ LoadSound (0,"mods/"+MORE$+"/SMoD/fireloud.ogg")
+Else
  LoadSound (0,"music/fireloud.ogg")
+   EndIf
    LoadSound (1,"music/ric1.ogg")
  LoadSound (2,"music/explode.ogg")
      LoadSound (3,"music/button_zap.ogg") 
        LoadSound (4,"music/hyprbf1a.ogg") 
            LoadSound (5,"music/ric2.ogg")
            LoadSound (6,"music/076.ogg")
+           If mods=1 And smods=1 And ReadFile(299, "mods/"+MORE$+"/SMoD/no.wav")
+           LoadSound (7, "mods/"+MORE$+"/SMoD/no.wav" )
+           Else
            LoadSound (7,"music/no.ogg")
+           EndIf
            LoadSound (8,"music/yes.ogg")
+           If mods=1 And smods=1 And ReadFile(299, "mods/"+MORE$+"/SMoD/jump.wav")
+           LoadSound (9, "mods/"+MORE$+"/SMoD/jump.wav" )
+           Else
            LoadSound (9,"music/jamp.ogg")
+           EndIf
            LoadSound (10,"music/teleport.ogg")
            LoadSound (11,"music/wsp.ogg")
            LoadSound (12,"music/kwa.ogg")
-            LoadSound (13,"music/vol.ogg")
-     
+           LoadSound (13,"music/vol.ogg")
+           
+           If mods=1 And smods=1 And ReadFile(299, "mods/"+MORE$+"/SMoD/menu.wav")
+             LoadSound (551,"mods/"+MORE$+"/SMoD/menu.wav")
+           Else
+             If ReadFile(299, "sounds/menu.wav")
+              LoadSound (551,"sounds/menu.wav") 
+           EndIf
+           EndIf
   LoadSprite (1, "gfx/str.png" )
   LoadSprite (2, "gfx/rama.png" )
 LoadSprite (3, "fon/1.png" )
@@ -108,107 +475,486 @@ LoadSprite (3, "fon/1.png" )
   LoadSprite (6, "gfx/target.png" )
     LoadSprite (7, "gfx/rama1.png" )
       LoadSprite (8, "weapon/wins.png" )
+      
+  
 ;-----------------------------------непроходимые
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/1.png")
+LoadSprite (9, "mods/"+MORE$+"/TMoD/1.png" )
+Else
 LoadSprite (9, "sprite/1.png" )
+EndIf
+;LoadSprite (9, "sprite/1.png" )
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/1z.png")
+LoadSprite (10, "mods/"+MORE$+"/TMoD/1z.png" )
+Else
 LoadSprite (10, "sprite/1.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/2.png")
+LoadSprite (11, "mods/"+MORE$+"/TMoD/2.png" )
+Else
 LoadSprite (11, "sprite/2.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/3.png")
+LoadSprite (12, "mods/"+MORE$+"/TMoD/3.png" )
+Else
 LoadSprite (12, "sprite/3.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/4.png")
+LoadSprite (13, "mods/"+MORE$+"/TMoD/4.png" )
+Else
 LoadSprite (13, "sprite/4.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/5.png")
+LoadSprite (14, "mods/"+MORE$+"/TMoD/5.png" )
+Else
 LoadSprite (14, "sprite/5.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/6.png")
+LoadSprite (15, "mods/"+MORE$+"/TMoD/6.png" )
+Else
 LoadSprite (15, "sprite/6.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/7.png")
+LoadSprite (16, "mods/"+MORE$+"/TMoD/7.png" )
+Else
 LoadSprite (16, "sprite/7.png" )
+EndIf
 LoadSprite (17, "sprite/8.png" )
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/9.png")
+LoadSprite (18, "mods/"+MORE$+"/TMoD/9.png" )
+Else
 LoadSprite (18, "sprite/9.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/10.png")
+LoadSprite (19, "mods/"+MORE$+"/TMoD/10.png" )
+Else
 LoadSprite (19, "sprite/10.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/53.png")
+LoadSprite (20, "mods/"+MORE$+"/TMoD/53.png" )
+Else
 LoadSprite (20, "sprite/53.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/11.png")
+LoadSprite (21, "mods/"+MORE$+"/TMoD/11.png" )
+Else
 LoadSprite (21, "sprite/11.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/12.png")
+LoadSprite (22, "mods/"+MORE$+"/TMoD/12.png" )
+Else
 LoadSprite (22, "sprite/12.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/13.png")
+LoadSprite (23, "mods/"+MORE$+"/TMoD/12.png" )
+Else
 LoadSprite (23, "sprite/13.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/14.png")
+LoadSprite (24, "mods/"+MORE$+"/TMoD/14.png" )
+Else
 LoadSprite (24, "sprite/14.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/15.bmp")
+LoadSprite (25, "mods/"+MORE$+"/TMoD/15.bmp" )
+Else
 LoadSprite (25, "sprite/15.bmp" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/16.bmp")
+LoadSprite (26, "mods/"+MORE$+"/TMoD/16.bmp" )
+Else
 LoadSprite (26, "sprite/16.bmp" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/chest_0000.png")
+LoadSprite (27, "mods/"+MORE$+"/TMoD/chest_0000.png" )  
+Else  
 LoadSprite (27, "sprite/chest_0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/chest_0001.png")
+LoadSprite (28, "mods/"+MORE$+"/TMoD/chest_0001.png" )
+Else
 LoadSprite (28, "sprite/chest_0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/duplo.png")
+LoadSprite (29, "mods/"+MORE$+"/TMoD/duplo.png" )
+Else
 LoadSprite (29, "sprite/duplo.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/77.png")
+LoadSprite (30, "mods/"+MORE$+"/TMoD/77.png" )
+Else
 LoadSprite (30, "sprite/77.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/8b.png")
+LoadSprite (31, "mods/"+MORE$+"/TMoD/8b.png" )
+Else
 LoadSprite (31, "sprite/8b.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/8bb.png")
+LoadSprite (32, "mods/"+MORE$+"/TMoD/8bb.png" )
+Else
 LoadSprite (32, "sprite/8bb.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/107.png")
+LoadSprite (33, "mods/"+MORE$+"/TMoD/107.png" )
+Else
 LoadSprite (33, "sprite/107.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/108.png")
+LoadSprite (34, "mods/"+MORE$+"/TMoD/108.png" )
+Else
 LoadSprite (34, "sprite/108.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/109.png")
+LoadSprite (35, "mods/"+MORE$+"/TMoD/109.png" )
+Else
 LoadSprite (35, "sprite/109.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/110.png")
+LoadSprite (36, "mods/"+MORE$+"/TMoD/110.png" )
+Else
 LoadSprite (36, "sprite/110.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/111.png")
+LoadSprite (37, "mods/"+MORE$+"/TMoD/111.png" )
+Else
 LoadSprite (37, "sprite/111.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/112.png")
+LoadSprite (38, "mods/"+MORE$+"/TMoD/112.png" )
+Else
 LoadSprite (38, "sprite/112.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/113.png")
+LoadSprite (39, "mods/"+MORE$+"/TMoD/113.png" )
+Else
 LoadSprite (39, "sprite/113.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/114.png")
+LoadSprite (40, "mods/"+MORE$+"/TMoD/114.png" )
+Else
 LoadSprite (40, "sprite/114.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/115.png")
+LoadSprite (41, "mods/"+MORE$+"/TMoD/115.png" )
+Else
 LoadSprite (41, "sprite/115.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/116.png")
+LoadSprite (42, "mods/"+MORE$+"/TMoD/116.png" )
+Else
 LoadSprite (42, "sprite/116.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/117.png")
+LoadSprite (43, "mods/"+MORE$+"/TMoD/117.png" )
+Else
 LoadSprite (43, "sprite/117.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/bult1.png")
+LoadSprite (44, "mods/"+MORE$+"/TMoD/bult1.png" )
+Else
 LoadSprite (44, "sprite/bult1.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/bult2.png")
+LoadSprite (45, "mods/"+MORE$+"/TMoD/bult2.png" )
+Else
 LoadSprite (45, "sprite/bult2.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/bult3.png")
+LoadSprite (46, "mods/"+MORE$+"/TMoD/bult3.png" )
+Else
 LoadSprite (46, "sprite/bult3.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/bult4.png")
+LoadSprite (47, "mods/"+MORE$+"/TMoD/bult4.png" )
+Else
 LoadSprite (47, "sprite/bult4.png" )
+EndIf 
 ;-----------------------------------проходимые
 
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/50.png")
+LoadSprite (50, "mods/"+MORE$+"/TMoD/50.png" )
+Else
 LoadSprite (50, "sprite/50.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/51.png")
+LoadSprite (51, "mods/"+MORE$+"/TMoD/51.png" )
+Else
 LoadSprite (51, "sprite/51.png" )
-LoadSprite (52, "sprite/52.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/52.png")
+LoadSprite (52, "mods/"+MORE$+"/TMoD/52.png" )
+Else
+LoadSprite (52, "sprite/53.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/53.png")
+LoadSprite (53, "mods/"+MORE$+"/TMoD/53.png" )
+Else
 LoadSprite (53, "sprite/53.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/54.png")
+LoadSprite (54, "mods/"+MORE$+"/TMoD/54.png" )
+Else
 LoadSprite (54, "sprite/54.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/55.png")
+LoadSprite (55, "mods/"+MORE$+"/TMoD/55.png" )
+Else
 LoadSprite (55, "sprite/55.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/56.png")
+LoadSprite (56, "mods/"+MORE$+"/TMoD/56.png" )
+Else
 LoadSprite (56, "sprite/56.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/57.png")
+LoadSprite (57, "mods/"+MORE$+"/TMoD/57.png" )
+Else
 LoadSprite (57, "sprite/57.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0000.png")
+LoadSprite (58, "mods/"+MORE$+"/TMoD/top_lamp_0000.png" )
+Else
 LoadSprite (58, "sprite/top_lamp_0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0001.png")
+LoadSprite (59, "mods/"+MORE$+"/TMoD/top_lamp_0001.png" )
+Else
 LoadSprite (59, "sprite/top_lamp_0001.png" )
-LoadSprite (60, "sprite/top_lamp_0002.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0002.png")
+LoadSprite (60, "mods/"+MORE$+"/TMoD/top_lamp_0002.png" )
+Else
+LoadSprite (60, "sprite/top_lamp_0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0003.png")
+LoadSprite (61, "mods/"+MORE$+"/TMoD/top_lamp_0003.png" )
+Else
 LoadSprite (61, "sprite/top_lamp_0003.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0004.png")
+LoadSprite (62, "mods/"+MORE$+"/TMoD/top_lamp_0004.png" )
+Else
 LoadSprite (62, "sprite/top_lamp_0004.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0005.png")
+LoadSprite (63, "mods/"+MORE$+"/TMoD/top_lamp_0005.png" )
+Else
 LoadSprite (63, "sprite/top_lamp_0005.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0006.png")
+LoadSprite (64, "mods/"+MORE$+"/TMoD/top_lamp_0006.png" )
+Else
 LoadSprite (64, "sprite/top_lamp_0006.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0007.png")
+LoadSprite (65, "mods/"+MORE$+"/TMoD/top_lamp_0007.png" )
+Else
 LoadSprite (65, "sprite/top_lamp_0007.png" )
-LoadSprite (66, "sprite/top_lamp_0008.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/top_lamp_0008.png")
+LoadSprite (66, "mods/"+MORE$+"/TMoD/top_lamp_0008.png" )
+Else
+LoadSprite (66, "sprite/top_lamp_0007.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0000.png")
+LoadSprite (67, "mods/"+MORE$+"/TMoD/gem_0000.png" )
+Else
 LoadSprite (67, "sprite/gem_0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0001.png")
+LoadSprite (68, "mods/"+MORE$+"/TMoD/gem_0001.png" )
+Else
 LoadSprite (68, "sprite/gem_0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0002.png")
+LoadSprite (69, "mods/"+MORE$+"/TMoD/gem_0002.png" )
+Else
 LoadSprite (69, "sprite/gem_0002.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0003.png")
+LoadSprite (70, "mods/"+MORE$+"/TMoD/gem_0003.png" )
+Else
 LoadSprite (70, "sprite/gem_0003.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0004.png")
+LoadSprite (71, "mods/"+MORE$+"/TMoD/gem_0004.png" )
+Else
 LoadSprite (71, "sprite/gem_0004.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0005.png")
+LoadSprite (72, "mods/"+MORE$+"/TMoD/gem_0005.png" )
+Else
 LoadSprite (72, "sprite/gem_0005.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0006.png")
+LoadSprite (73, "mods/"+MORE$+"/TMoD/gem_0006.png" )
+Else
 LoadSprite (73, "sprite/gem_0006.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0007.png")
+LoadSprite (74, "mods/"+MORE$+"/TMoD/gem_0007.png" )
+Else
 LoadSprite (74, "sprite/gem_0007.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0008.png")
+LoadSprite (75, "mods/"+MORE$+"/TMoD/gem_0008.png" )
+Else
 LoadSprite (75, "sprite/gem_0008.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/gem_0009.png")
+LoadSprite (76, "mods/"+MORE$+"/TMoD/gem_0009.png" )
+Else
 LoadSprite (76, "sprite/gem_0009.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0000.png")
 LoadSprite (77, "sprite/water3_0000.png" )
+Else
+LoadSprite (77, "sprite/water3_0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0001.png")
 LoadSprite (78, "sprite/water3_0001.png" )
+Else
+LoadSprite (78, "sprite/water3_0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0002.png")
 LoadSprite (79, "sprite/water3_0002.png" )
+Else
+LoadSprite (79, "sprite/water3_0002.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0003.png")
 LoadSprite (80, "sprite/water3_0003.png" )
+Else
+LoadSprite (80, "sprite/water3_0003.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0004.png")
 LoadSprite (81, "sprite/water3_0004.png" )
+Else
+LoadSprite (81, "sprite/water3_0004.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0005.png")
 LoadSprite (82, "sprite/water3_0005.png" )
+Else
+LoadSprite (82, "sprite/water3_0005.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/water3_0006.png")
 LoadSprite (83, "sprite/water3_0006.png" )
+Else
+LoadSprite (83, "sprite/water3_0006.png" )
+EndIf
 
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0010.png")
+LoadSprite (84, "mods/"+MORE$+"/TMoD/fence_0010.png" )
+Else
 LoadSprite (84, "sprite/fence_0010.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0011.png")
+LoadSprite (85, "mods/"+MORE$+"/TMoD/fence_0011.png" )
+Else
 LoadSprite (85, "sprite/fence_0011.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0012.png")
+LoadSprite (86, "mods/"+MORE$+"/TMoD/fence_0012.png" )
+Else
 LoadSprite (86, "sprite/fence_0012.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0013.png")
+LoadSprite (87, "mods/"+MORE$+"/TMoD/fence_0013.png" )
+Else
 LoadSprite (87, "sprite/fence_0013.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0014.png")
+LoadSprite (88, "mods/"+MORE$+"/TMoD/fence_0014.png" )
+Else
 LoadSprite (88, "sprite/fence_0014.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0015.png")
+LoadSprite (89, "mods/"+MORE$+"/TMoD/fence_0015.png" )
+Else
 LoadSprite (89, "sprite/fence_0015.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0016.png")
+LoadSprite (90, "mods/"+MORE$+"/TMoD/fence_0016.png" )
+Else
 LoadSprite (90, "sprite/fence_0016.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0017.png")
+LoadSprite (91, "mods/"+MORE$+"/TMoD/fence_0017.png" )
+Else
 LoadSprite (91, "sprite/fence_0017.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/barrell0000.png")
+LoadSprite (92, "mods/"+MORE$+"/TMoD/barrell0000.png" )
+Else
 LoadSprite (92, "sprite/barrell0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/barrell0001.png")
+LoadSprite (93, "mods/"+MORE$+"/TMoD/barrell0001.png" )
+Else
 LoadSprite (93, "sprite/barrell0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/barrell0002.png")
+LoadSprite (94, "mods/"+MORE$+"/TMoD/barrell0002.png" )
+Else
 LoadSprite (94, "sprite/barrell0002.png" )
-LoadSprite (95, "sprite/barrell0001.png" )
-LoadSprite (98, "sprite/pult1.png" )
-LoadSprite (99, "sprite/pult2.png" )
-  ;-----------------------------------Передний план
-LoadSprite (100, "sprite/fence_0000.png" )
-LoadSprite (101, "sprite/fence_0001.png" )
-LoadSprite (102, "sprite/fence_0002.png" )
-LoadSprite (103, "sprite/fence_0003.png" )
-LoadSprite (104, "sprite/fence_0004.png" )
-LoadSprite (105, "sprite/fence_0005.png" )
-LoadSprite (106, "sprite/fence_0006.png" )
-LoadSprite (107, "sprite/fence_0007.png" )
+EndIf
 
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/barrell0001.png")
+LoadSprite (95, "mods/"+MORE$+"/TMoD/barrell0001.png" )
+Else
+LoadSprite (95, "sprite/barrell0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/pult1.png")
+LoadSprite (98, "mods/"+MORE$+"/TMoD/pult1.png" )
+Else
+LoadSprite (98, "sprite/pult1.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0000.png")  
+LoadSprite (99, "mods/"+MORE$+"/TMoD/fence_0000.png" )
+Else
+LoadSprite (99, "sprite/pult2.png" )
+EndIf
+;-----------------------------------Передний план
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0000.png")
+LoadSprite (100, "mods/"+MORE$+"/TMoD/fence_0000.png" )
+Else
+LoadSprite (100, "sprite/fence_0000.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0001.png")
+LoadSprite (101, "mods/"+MORE$+"/TMoD/fence_0001.png" )
+Else
+LoadSprite (101, "sprite/fence_0001.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0002.png")
+LoadSprite (102, "mods/"+MORE$+"/TMoD/fence_0002.png" )
+Else
+LoadSprite (102, "sprite/fence_0002.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0003.png")
+LoadSprite (103, "mods/"+MORE$+"/TMoD/fence_0003.png" )
+Else
+LoadSprite (103, "sprite/fence_0003.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0004.png")
+LoadSprite (104, "mods/"+MORE$+"/TMoD/fence_0004.png" )
+Else
+LoadSprite (104, "sprite/fence_0004.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0005.png")
+LoadSprite (105, "mods/"+MORE$+"/TMoD/fence_0005.png" )
+Else
+LoadSprite (105, "sprite/fence_0005.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0006.png")
+LoadSprite (106, "mods/"+MORE$+"/TMoD/fence_0006.png" )
+Else
+LoadSprite (106, "sprite/fence_0006.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/fence_0007.png")
+LoadSprite (107, "mods/"+MORE$+"/TMoD/fence_0007.png" )
+Else
+LoadSprite (107, "sprite/fence_0007.png" )
+EndIf
 
 ;-----------------------------------задний план
 LoadSprite (120, "sprite/104.png" )
@@ -250,14 +996,24 @@ LoadSprite (255, "sprite/101.png" )
 
 
 LoadSprite (280, "fon/1.png" )
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/63.png")
+LoadSprite (281, "mods/"+MORE$+"/TMoD/63.png" )
+Else
 LoadSprite (281, "sprite/63.png" )
+EndIf
+If mods=1 And ReadFile(0, "mods/"+MORE$+"/TMoD/64.png")
+LoadSprite (282, "mods/"+MORE$+"/TMoD/64.png" )
+Else
 LoadSprite (282, "sprite/64.png" )
+EndIf
 LoadSprite (283, "fon/fon1a.png" )
 
 LoadSprite (290, "gfx/cub1.png",#PB_Sprite_Texture )
-
+If mods=1 And umods=1 And ReadFile(0, "mods/"+MORE$+"/UMoD/start.png")
+LoadSprite (299, "mods/"+MORE$+"/UMoD/start.png",#PB_Sprite_Texture )
+Else
 LoadSprite (299, "fon/start.bmp",#PB_Sprite_Texture )
-
+EndIf
 LoadSprite (300, "sprite/z1.png",#PB_Sprite_Texture )
 LoadSprite (301, "sprite/z2.png",#PB_Sprite_Texture )
 LoadSprite (302, "sprite/z3.png",#PB_Sprite_Texture )
@@ -280,6 +1036,8 @@ LoadSprite (318, "sprite/bah4.png",#PB_Sprite_Texture )
 LoadSprite (319, "sprite/bah5.png",#PB_Sprite_Texture )
 LoadSprite (320, "sprite/bah6.png",#PB_Sprite_Texture )
 LoadSprite (321, "sprite/bahh.png",#PB_Sprite_Texture )
+
+;->:DD:D:D::D
 
 LoadSprite (500, "harak/vudra_walk_0000.png",#PB_Sprite_Texture )
 LoadSprite (501, "harak/vudra_walk_0001.png",#PB_Sprite_Texture )
@@ -393,48 +1151,267 @@ LoadSprite (639, "harak/vudra_anim_2_jump_0000b.png",#PB_Sprite_Texture )
 LoadSprite (640, "harak/vudra_anim_2_jump_0001b.png",#PB_Sprite_Texture )
 LoadSprite (641, "harak/vudra_anim_2_jump_0002b.png",#PB_Sprite_Texture )
 
+;->FUCJ NU LIFE
 
+
+If cmods=1 And ReadFile(0, "mods/"+MORE$+"/CMoD/fox_walk_0000.png")
+LoadSprite (500+200, "mods/"+MORE$+"/CMoD/fox_walk_0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (500+200, "harak/fox_walk_0000.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And ReadFile(0, "mods/"+MORE$+"/CMoD/fox_walk_0001.png")
+LoadSprite (501+200, "mods/"+MORE$+"/CMoD/fox_walk_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (501+200, "harak/fox_walk_0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And ReadFile(299, "mods/"+MORE$+"/CMoD/fox_walk_0002.png")
+LoadSprite (502+200, "mods/"+MORE$+"/CMoD/fox_walk_0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (502+200, "harak/fox_walk_0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And ReadFile(299, "mods/"+MORE$+"/CMoD/fox_walk_0003.png")
+LoadSprite (503+200, "mods/"+MORE$+"/CMoD/fox_walk_0003.png",#PB_Sprite_Texture )
+Else
 LoadSprite (503+200, "harak/fox_walk_0003.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And ReadFile(299, "mods/"+MORE$+"/CMoD/fox_walk_0004.png")
+LoadSprite (504+200, "mods/"+MORE$+"/CMoD/fox_walk_0004.png",#PB_Sprite_Texture )
+Else
 LoadSprite (504+200, "harak/fox_walk_0004.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And ReadFile(299, "mods/"+MORE$+"/CMoD/fox_walk_0005.png")
+LoadSprite (505+200, "mods/"+MORE$+"/CMoD/fox_walk_0005.png",#PB_Sprite_Texture )
+Else
 LoadSprite (505+200, "harak/fox_walk_0005.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (506+200, "mods/"+MORE$+"/CMoD/fox_walk_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (506+200, "harak/fox_walk_0006.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (507+200, "mods/"+MORE$+"/CMoD/fox_walk_0007.png",#PB_Sprite_Texture )
+Else
 LoadSprite (507+200, "harak/fox_walk_0007.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (508+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (508+200, "harak/2/fox_walk_0000.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (509+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (509+200, "harak/2/fox_walk_0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (510+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (510+200, "harak/2/fox_walk_0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (511+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0003.png",#PB_Sprite_Texture )
+Else
 LoadSprite (511+200, "harak/2/fox_walk_0003.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (512+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0004.png",#PB_Sprite_Texture )
+Else
 LoadSprite (512+200, "harak/2/fox_walk_0004.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (513+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0005.png",#PB_Sprite_Texture )
+Else
 LoadSprite (513+200, "harak/2/fox_walk_0005.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (514+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (514+200, "harak/2/fox_walk_0006.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (515+200, "mods/"+MORE$+"/CMoD/2/fox_walk_0007.png",#PB_Sprite_Texture )
+Else
 LoadSprite (515+200, "harak/2/fox_walk_0007.png",#PB_Sprite_Texture )
-
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (516+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (516+200, "harak/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (517+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (517+200, "harak/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (518+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (518+200, "harak/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (519+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+Else
 LoadSprite (519+200, "harak/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (520+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+Else
 LoadSprite (520+200, "harak/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (521+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+Else
 LoadSprite (521+200, "harak/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (522+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (522+200, "harak/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (523+200, "mods/"+MORE$+"/CMoD/fox_anim_shoot0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (523+200, "harak/fox_anim_shoot0000.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (524+200, "mods/"+MORE$+"/CMoD/fox_anim_shoot0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (524+200, "harak/fox_anim_shoot0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (525+200, "mods/"+MORE$+"/CMoD/fox_anim_shoot0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (525+200, "harak/fox_anim_shoot0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (526+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (526+200, "harak/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (527+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+Else
 LoadSprite (527+200, "harak/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (528+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+Else
 LoadSprite (528+200, "harak/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (529+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+Else
 LoadSprite (529+200, "harak/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (530+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (530+200, "harak/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (531+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (531+200, "harak/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (532+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (532+200, "harak/2/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (533+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (533+200, "harak/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (534+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+Else
 LoadSprite (534+200, "harak/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (535+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+Else
 LoadSprite (535+200, "harak/2/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (536+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+Else
 LoadSprite (536+200, "harak/2/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (537+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+Else
 LoadSprite (537+200, "harak/2/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (538+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (538+200, "harak/2/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+EndIf
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (539+200, "mods/"+MORE$+"/CMoD/fox_anim_shoot0000.png",#PB_Sprite_Texture )
+Else
 LoadSprite (539+200, "harak/2/fox_anim_shoot0000.png",#PB_Sprite_Texture )
+EndIf
+
+;->=======
+;->FDFDFD
+;->=======
+
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (540+200, "mods/"+MORE$+"/CMoD/2/fox_anim_shoot0001.png",#PB_Sprite_Texture )
+LoadSprite (541+200, "mods/"+MORE$+"/CMoD/2/fox_anim_shoot0002.png",#PB_Sprite_Texture )
+LoadSprite (542+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
+LoadSprite (543+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0005.png",#PB_Sprite_Texture )
+LoadSprite (544+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0004.png",#PB_Sprite_Texture )
+LoadSprite (545+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0003.png",#PB_Sprite_Texture )
+LoadSprite (546+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+LoadSprite (547+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+LoadSprite (548+200, "mods/"+MORE$+"/CMoD/fox_die_0000.png",#PB_Sprite_Texture )
+LoadSprite (549+200, "mods/"+MORE$+"/CMoD/fox_die_0001.png",#PB_Sprite_Texture )
+LoadSprite (550+200, "mods/"+MORE$+"/CMoD/fox_die_0002.png",#PB_Sprite_Texture )
+LoadSprite (551+200, "mods/"+MORE$+"/CMoD/fox_die_0002.png",#PB_Sprite_Texture )
+LoadSprite (552+200, "mods/"+MORE$+"/CMoD/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (553+200, "mods/"+MORE$+"/CMoD/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (554+200, "mods/"+MORE$+"/CMoD/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (555+200, "mods/"+MORE$+"/CMoD/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (556+200, "mods/"+MORE$+"/CMoD/2/fox_die_0000.png",#PB_Sprite_Texture )
+LoadSprite (557+200, "mods/"+MORE$+"/CMoD/2/fox_die_0001.png",#PB_Sprite_Texture )
+LoadSprite (558+200, "mods/"+MORE$+"/CMoD/2/fox_die_0002.png",#PB_Sprite_Texture )
+LoadSprite (559+200, "mods/"+MORE$+"/CMoD/2/fox_die_0002.png",#PB_Sprite_Texture )
+LoadSprite (560+200, "mods/"+MORE$+"/CMoD/2/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (561+200, "mods/"+MORE$+"/CMoD/2/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (562+200, "mods/"+MORE$+"/CMoD/2/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (563+200, "mods/"+MORE$+"/CMoD/2/fox_die_0003.png",#PB_Sprite_Texture )
+
+LoadSprite (564+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+LoadSprite (565+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+LoadSprite (566+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+LoadSprite (567+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0001.png",#PB_Sprite_Texture )
+LoadSprite (568+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0002.png",#PB_Sprite_Texture )
+LoadSprite (569+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0003.png",#PB_Sprite_Texture )
+LoadSprite (570+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0004.png",#PB_Sprite_Texture )
+LoadSprite (571+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0003.png",#PB_Sprite_Texture )
+LoadSprite (572+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0002.png",#PB_Sprite_Texture )
+LoadSprite (573+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_up0001.png",#PB_Sprite_Texture )
+LoadSprite (574+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+LoadSprite (575+200, "mods/"+MORE$+"/CMoD/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+
+
+LoadSprite (576+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0000.png",#PB_Sprite_Texture )
+LoadSprite (577+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+LoadSprite (578+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+LoadSprite (579+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0001.png",#PB_Sprite_Texture )
+LoadSprite (580+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0002.png",#PB_Sprite_Texture )
+LoadSprite (581+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0003.png",#PB_Sprite_Texture )
+LoadSprite (582+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0004.png",#PB_Sprite_Texture )
+LoadSprite (583+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0003.png",#PB_Sprite_Texture )
+LoadSprite (584+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0002.png",#PB_Sprite_Texture )
+LoadSprite (585+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_up0001.png",#PB_Sprite_Texture )
+LoadSprite (586+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
+LoadSprite (587+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+Else
 LoadSprite (540+200, "harak/2/fox_anim_shoot0001.png",#PB_Sprite_Texture )
 LoadSprite (541+200, "harak/2/fox_anim_shoot0002.png",#PB_Sprite_Texture )
 LoadSprite (542+200, "harak/2/fox_anim_2_shoot_0006.png",#PB_Sprite_Texture )
@@ -486,8 +1463,18 @@ LoadSprite (584+200, "harak/2/fox_anim_2_shoot_up0002.png",#PB_Sprite_Texture )
 LoadSprite (585+200, "harak/2/fox_anim_2_shoot_up0001.png",#PB_Sprite_Texture )
 LoadSprite (586+200, "harak/2/fox_anim_2_shoot_0002.png",#PB_Sprite_Texture )
 LoadSprite (587+200, "harak/2/fox_anim_2_shoot_0001.png",#PB_Sprite_Texture )
+EndIf
 
-
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (628+200, "mods/"+MORE$+"/CMoD/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (629+200, "mods/"+MORE$+"/CMoD/fox_die_0004.png",#PB_Sprite_Texture )
+LoadSprite (630+200, "mods/"+MORE$+"/CMoD/fox_die_0005.png",#PB_Sprite_Texture )
+LoadSprite (631+200, "mods/"+MORE$+"/CMoD/fox_die_0006.png",#PB_Sprite_Texture )
+LoadSprite (632+200, "mods/"+MORE$+"/CMoD/2/fox_die_0003.png",#PB_Sprite_Texture )
+LoadSprite (633+200, "mods/"+MORE$+"/CMoD/2/fox_die_0004.png",#PB_Sprite_Texture )
+LoadSprite (634+200, "mods/"+MORE$+"/CMoD/2/fox_die_0005.png",#PB_Sprite_Texture )
+LoadSprite (635+200, "mods/"+MORE$+"/CMoD/2/fox_die_0006.png",#PB_Sprite_Texture )
+Else
 LoadSprite (628+200, "harak/fox_die_0003.png",#PB_Sprite_Texture )
 LoadSprite (629+200, "harak/fox_die_0004.png",#PB_Sprite_Texture )
 LoadSprite (630+200, "harak/fox_die_0005.png",#PB_Sprite_Texture )
@@ -496,9 +1483,18 @@ LoadSprite (632+200, "harak/2/fox_die_0003.png",#PB_Sprite_Texture )
 LoadSprite (633+200, "harak/2/fox_die_0004.png",#PB_Sprite_Texture )
 LoadSprite (634+200, "harak/2/fox_die_0005.png",#PB_Sprite_Texture )
 LoadSprite (635+200, "harak/2/fox_die_0006.png",#PB_Sprite_Texture )
+EndIf
 
 
+If cmods=1 And FileSize("mods/"+MORE$+"/CMoD")=-2
+LoadSprite (636+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_jump_0000.png",#PB_Sprite_Texture )
+LoadSprite (637+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_jump_0001.png",#PB_Sprite_Texture )
+LoadSprite (638+200, "mods/"+MORE$+"/CMoD/2/fox_anim_2_jump_0002.png",#PB_Sprite_Texture )
 
+LoadSprite (639+200, "mods/"+MORE$+"/CMoD/fox_anim_2_jump_0000b.png",#PB_Sprite_Texture )
+LoadSprite (640+200, "mods/"+MORE$+"/CMoD/fox_anim_2_jump_0001b.png",#PB_Sprite_Texture )
+LoadSprite (641+200, "mods/"+MORE$+"/CMoD/fox_anim_2_jump_0002b.png",#PB_Sprite_Texture )
+Else
 LoadSprite (636+200, "harak/2/fox_anim_2_jump_0000.png",#PB_Sprite_Texture )
 LoadSprite (637+200, "harak/2/fox_anim_2_jump_0001.png",#PB_Sprite_Texture )
 LoadSprite (638+200, "harak/2/fox_anim_2_jump_0002.png",#PB_Sprite_Texture )
@@ -506,8 +1502,8 @@ LoadSprite (638+200, "harak/2/fox_anim_2_jump_0002.png",#PB_Sprite_Texture )
 LoadSprite (639+200, "harak/fox_anim_2_jump_0000b.png",#PB_Sprite_Texture )
 LoadSprite (640+200, "harak/fox_anim_2_jump_0001b.png",#PB_Sprite_Texture )
 LoadSprite (641+200, "harak/fox_anim_2_jump_0002b.png",#PB_Sprite_Texture )
-
-
+EndIf
+;->FRPG
 
 LoadSprite (1200, "harak/frog_walk_0000.png",#PB_Sprite_Texture )
 LoadSprite (1201, "harak/frog_walk_0001.png",#PB_Sprite_Texture )
@@ -553,6 +1549,8 @@ LoadSprite (638+700, "harak/2/frog_walk_0006.png",#PB_Sprite_Texture )
 LoadSprite (639+700, "harak/frog_jump_0000.png",#PB_Sprite_Texture )
 LoadSprite (640+700, "harak/frog_jump_0001.png",#PB_Sprite_Texture )
 LoadSprite (641+700, "harak/frog_walk_0006.png",#PB_Sprite_Texture )
+
+
 
  LoadSprite (900, "weapon/1.png" )
  LoadSprite (901, "weapon/2.png" )
@@ -669,8 +1667,19 @@ LoadSprite (1505, "weapon/6i.png" )
 
 LoadSprite (96, "sprite/0.bmp",#PB_Sprite_Texture )
 LoadSprite (97, "sprite/0.bmp",#PB_Sprite_Texture )
+If mods=1
+;LoadSprite (2011, "patch/logo.png",#PB_Sprite_Texture )
+;LoadSprite (2011, MODPATH$+"/logo.png",#PB_Sprite_Texture )
+LoadSprite (2011, "mods/"+MORE$+"/logo.png",#PB_Sprite_Texture )
 
+
+Else
+If ReadFile(0, "patch/logo.png")
+LoadSprite (2011, "patch/logo.png",#PB_Sprite_Texture )
+Else
 LoadSprite (2011, "gfx/logo.png",#PB_Sprite_Texture )
+EndIf
+EndIf
 LoadSprite (2012, "gfx/m1.png" )
 LoadSprite (2013, "gfx/m2.png" )
 LoadSprite (2014, "gfx/m3.png" )
@@ -681,8 +1690,34 @@ LoadSprite (2018, "gfx/s1.png" )
 LoadSprite (2019, "gfx/s2.png" )
 LoadSprite (2020, "gfx/pods.png" )
 LoadSprite (2021, "gfx/m7.png" )
+;LoadSprite (2077, "neoGUI/playRU.png" )
+;LoadSprite (2078, "neoGUI/playEN.png" )
+
+
+
+
+
+;>--------
+
+;rtheard1 = CreateThread (@Theard1_Res(), 1)
+;rtheard2 = CreateThread (@Theard1_Res(), 2)
+;rtheard3 = CreateThread (@Theard1_Res(), 3)
+;rtheard4 = CreateThread (@Theard1_Res(), 4)
+
+;WaitThread(rtheard1)
+;WaitThread(rtheard2)
+;WaitThread(rtheard3)
+;WaitThread(rtheard4)
+;
+;
+;
+;LMAO, wut a fak?!
+;
+
+;--END
 
 CreateSprite3D(2011, 2011)
+;CreateSprite3D(2077, 2077)
 CreateSprite3D(1, 300)
 CreateSprite3D(2, 301)
 CreateSprite3D(3, 302)
@@ -869,29 +1904,35 @@ Stop3D()
 
 FlipBuffers()
 
-Case 4
-  PlaySound(5)
+;Case 4
+ ; PlaySound(5)
   
-  
+;  
+;------------SET-AUTORU
 
-  If lang=1:lang=0:
-    SetGadgetText(1, "Меню")
-    SetGadgetText(2, "Разрешение")  
-    SetGadgetText(3, "Играть")  
-    SetGadgetText(4, "Русский")  
-    SetGadgetText(5, "Выход")  
-    SetWindowTitle(0, "Выдры и Феньки") 
-  :Goto drrrr:EndIf 
-  If lang=0:lang=1
-      SetGadgetText(1, "Menu")
-    SetGadgetText(2, "Resolution")  
-    SetGadgetText(3, "Play")  
-    SetGadgetText(4, "English")  
-    SetGadgetText(5, "Exit")  
-    SetWindowTitle(0, "Otters and Fennecs")   
-    
-  :Goto drrrr:EndIf 
-    
+
+ ; If lang=1:lang=0:
+; ; If lang=1:lang=0:
+    ;SetGadgetText(1, "Меню")
+   ; SetGadgetText(2, "Масштаб")  
+  ;  SetGadgetText(3, "Играть")  
+  ;  SetGadgetText(4, "Русский")  
+  ;  SetGadgetText(5, "Выход")  
+  ;  SetGadgetText(6, "Модификации (НЕ СТАБИЛЬНО, НЕ НАЖИМАТЬ!")      
+  ;  SetWindowTitle(0, "Выдры и Феньки CUTSTOM BUILD v1.0.0-Alpha") 
+  ;:Goto drrrr:EndIf 
+  ;If lang=0:lang=1
+;;  If lang=0:lang=1
+ ;     SetGadgetText(1, "Menu")
+ ;   SetGadgetText(2, "Field of View")  
+ ;   SetGadgetText(3, "Play")  
+ ;   SetGadgetText(4, "English")  
+ ;   SetGadgetText(5, "Exit")  
+ ;   SetGadgetText(6, "Mods (UNSTABLE, MAY CAUSE CRASH! ")  
+ ;   SetWindowTitle(0, "Otters and Fennecs CUTSTOM BUILD v1.0.0-Alpha")   
+ ;   
+ ; :Goto drrrr:EndIf 
+ ;   
 drrrr:
 Gosub sasa
  If letsgo=0:Gosub  zoof::EndIf 
@@ -901,24 +1942,174 @@ Case 5
             
           Case 3
             PlaySound(5)
+            StopSound(551)
  If EventType() =  #PB_EventType_LeftClick :  exitm=0: EndIf
+
+;---OPEN WINDOW
+
+
+Case 6
+
+  If OpenConsole ()
+  
+  
+    ConsoleTitle ("MODS, VERY UNSTABLE!")
+  
+;lEnableExplicit
+  ; Define the constants:
+  #MAXBYTE = 255
+  #MAXLONG = 2147483647
+  
+  
+    ConsoleColor(4,0)  
+    ConsoleLocate (18,12)                          ; x y position 
+    If mods=0
+    Print ("Allow Mods?[yes/no, if you type no, programm will quit]:  ")           ; Ask for name
+    amods$ = Input()
+    
+    
+    If amods$ = "yes"
+    
+    mods=1
+    
+    If CreateFile(0, "work/mods.dat")
+        WriteStringN(0, Str(mods))
+       EndIf
+       
+    EndIf
+    EndIf
+       
+    ClearConsole()
+    
+    PrintN ( "Welcome to ModManager by NewSource v.1.0" )
+    PrintN ( "Be careful, mods may cause crash and unstable state" )
+    PrintN ( "" )
+    PrintN ( "!!Only one mod can be loaded at same time!!" )
+      
+    PrintN ("")
+    PrintN ("1-Listmods")
+    PrintN ("2-Set mod")
+    PrintN ("3-Help")
+    PrintN ("4-Exit")
+   ; If ReadFile(0, "work/mods.dat")
+   ; PrintN ("5-Unload Installed Mod (NOT ")
+  ;  EndIf
+    zzz=Val(Input())
+    
+   ; If zzz=5
+    ;  If ReadFile(0, "work/currentmod.dat")
+     ;     DeleteFile("work/currentmod.dat")
+     ;     PrintN ("Done")
+     ;   Else
+       ;   PrintN ("No Mods Installed")
+          
+       ; EndIf
+        ;EndIf
+    If zzz=1
+      ClearConsole()
+      
+      RunProgram("utilities/listmods.bat")
+      
+      
+      ElseIf zzz=2
+        ClearConsole()
+        
+        If ReadFile(0, "work/currentmod.dat")
+
+            MO$ =  Trim(ReadString(0))
+
+            cmod = Val(MO$)
+            
+            moe=1
+            PrintN ("====================")
+            PrintN ("Mod Installer v1.0")
+            PrintN ("====================")
+            PrintN ("")
+            PrintN ("Current mod is "+MO$)
+            PrintN ("The mod already is set'd")
+            PrintN ("Do you want re-config mods?")
+            
+            re$ = Input()
+    
+    
+            If re$ = "yes"
+            
+            PrintN ("If you not sure about mod name, open in explorer ")
+            PrintN ("mods folder and look at name of subfolders there. ")
+            PrintN (" ")
+            Print ("Input mod name:")
+            MODNAME$ = Input()
+            
+            
+
+            If CreateFile(0, "work/currentmod.dat")
+                WriteString(0, MODNAME$)
+            EndIf
+            
+            PrintN ("The Mod is Installed.")
+            PrintN ("CAUTION: DO NOT CLOSE CONSOLE WINDOW!!!.")
+            PrintN ("Back to game and press Exit button, then re-launch game.")
+            
+            Else
+              CloseConsole()
+              End
+            EndIf
+        Else
+            PrintN ("====================")
+            PrintN ("Mod Installer v1.0")
+            PrintN ("====================")
+            PrintN ("")
+            PrintN ("No mods is installed right now")
+            
+            Print ("Input mod name:")
+            MODNAME1$ = Input()
+            
+            
+
+            If CreateFile(0, "work/currentmod.dat")
+                WriteString(0, MODNAME1$)
+            EndIf
+            
+            PrintN ("The Mod is Installed.")
+            PrintN ("CAUTION: DO NOT CLOSE CONSOLE WINDOW!!!.")
+            PrintN ("Back to game and press Exit button, then re-launch game.")
+            End
+        EndIf
+        
+      ElseIf zzz=3
+          PrintN ("No help right now...")
+          PrintN ("mods/"+MORE$)
+          PrintN (Str(MONA))
+          MessageRequester("PureBasic", "Line read: "+MORE$, 0)
+          
+      Else
+        CloseConsole()
+        End
+    EndIf
+      
+    Else
+       CloseConsole()                  
+    EndIf
 
 Case 2
   PlaySound(5)
-  If xraz=600:
+  If xraz=1280:
       xraz=800
-      yraz=600
+      yraz=480
+      fov=110
       
     Goto nachalo:EndIf 
   
     If xraz=800:
-   xraz=952
-   yraz=720
+   xraz=1366
+   yraz=768
+   fov=90
  Goto nachalo:EndIf 
  
-     If xraz=952:
-   xraz=600
-   yraz=486
+     If xraz=1366:
+   xraz=1280
+   yraz=720
+   fov=100
     Goto nachalo:EndIf 
 
 
@@ -1004,7 +2195,11 @@ If exitm=1:ReleaseMouse(1):DisableGadget(3, 0):EndIf
 
     
 EndIf
-
+;-
+;-
+;-If OpenWindow END
+;-
+;-
 End 
 
 ;-------------animstr
@@ -1101,8 +2296,9 @@ start22:
 
       
 letsgo=1
-  DisableGadget(4, 1)
+ ; DisableGadget(4, 1)
  DisableGadget(1, 1)
+ DisableGadget(1, 6)
 Start3D()
 Sprite3DBlendingMode(2, 6)
 
@@ -1407,12 +2603,12 @@ Gosub sasa:
       DrawingMode(1)
       If lang=0:
       
-      DrawText(xraz/2-400/2+52, 402, "Начать игру", RGB((255),(255),(255)) )
-      DrawText(xraz/2-400/2+52+169, 182, "Кол-во побед", RGB((255),(255),(255)) )
-      DrawText(xraz/2-400/2+52+169, 182+44, "Артефактов", RGB((255),(255),(255)) )
-      DrawText(xraz/2-400/2+52+169, 182+66, "Новые кристаллы", RGB((255),(255),(255)) )
-      DrawText(xraz/2-400/2+52+169, 182+88, "Кол-во денег  "+Str(monstart), RGB((255),(255),(255)) )
-      DrawText(xraz/2-400/2+52+169, 182+110, "Сбросить настройки", RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52, 402, STARTGAME$, RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52+169, 182, WINCON$, RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52+169, 182+44, ARTIFACTS$, RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52+169, 182+66, NC$, RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52+169, 182+88, COM$+Str(monstart), RGB((255),(255),(255)) )
+      DrawText(xraz/2-400/2+52+169, 182+110, RESET$, RGB((255),(255),(255)) )
       
       a=TextWidth(Str(kol))
       a/2
@@ -1425,8 +2621,8 @@ If sizel=1:DrawText(xraz/2-400/2+52+176+124, 182+22, "Мал", RGB((255),(255),(255
 If sizel=2:DrawText(xraz/2-400/2+52+176+124, 182+22, "Сре", RGB((255),(255),(255)) ):EndIf
 If sizel=3:DrawText(xraz/2-400/2+52+176+124, 182+22, "Бол", RGB((255),(255),(255)) ):EndIf
 DrawText(xraz/2-400/2+52+176+124, 182+44, Str(arteflost), RGB((255),(255),(255)) )
-If almazrea=1:DrawText(xraz/2-400/2+52+176+124, 182+66, "Да", RGB((255),(255),(255)) ):EndIf 
-If almazrea=0:DrawText(xraz/2-400/2+52+176+124, 182+66, "Нет", RGB((255),(255),(255)) ):EndIf 
+If almazrea=1:DrawText(xraz/2-400/2+52+176+124, 182+66, YES$, RGB((255),(255),(255)) ):EndIf 
+If almazrea=0:DrawText(xraz/2-400/2+52+176+124, 182+66, NO$, RGB((255),(255),(255)) ):EndIf 
 
 EndIf 
 
@@ -2462,7 +3658,7 @@ smertxw=0
 endturr=0
  Dim ss.l(32)        
      
-SetFrameRate(35)
+SetFrameRate(FPS) ;->FPS Value
 
 
 
@@ -2491,7 +3687,7 @@ If namee()\yes=2015:p0+500:bot=1:EndIf
          tur3()\trafic4=1
           tur3()\trafic5=0
            tur3()\name$=namee()\name$
-        tur3()\energ=64
+        tur3()\energ=64 ;->Affects HP value
         tur3()\energ1=0
           tur3()\energ2=0
         tur3()\color=namee()\color
@@ -4519,28 +5715,28 @@ If mnm=2:DrawText(260+12+30,yraz-yraz/2+35 , "Нет", RGB((0),(0),(0)) ):EndIf
 DrawingMode(#PB_2DDrawing_Transparent )
 DrawingFont(FontID(0)) 
 
-DrawText(250,yraz-yraz/2+5 , "Передать ход? ", RGB((255),(200),(100)) )
+DrawText(250,yraz-yraz/2+5 , ENDTURN$, RGB((255),(200),(100)) )
 DrawingFont(FontID(1)) 
-DrawText(260,yraz-yraz/2+35 , "Да", RGB((255),(200),(100)) )
+DrawText(260,yraz-yraz/2+35 , YES$, RGB((255),(200),(100)) )
 DrawText(260+30,yraz-yraz/2+35 , "/", RGB((255),(200),(100)) )
-DrawText(260+12+30,yraz-yraz/2+35 , "Нет", RGB((255),(200),(100)) )
+DrawText(260+12+30,yraz-yraz/2+35 , NO$, RGB((255),(200),(100)) )
 EndIf 
-   If lang=1
-  DrawingFont(FontID(1)) 
-  DrawingMode(#PB_2DDrawing_XOr )
+   ;If lang=1
+  ;DrawingFont(FontID(1)) 
+  ;DrawingMode(#PB_2DDrawing_XOr )
  
-If mnm=1:DrawText(260,yraz-yraz/2+35 , "Yes", RGB((0),(0),(0)) ):EndIf 
-If mnm=2:DrawText(260+12+30,yraz-yraz/2+35 , "No", RGB((0),(0),(0)) ):EndIf 
+;If mnm=1:DrawText(260,yraz-yraz/2+35 , "Yes", RGB((0),(0),(0)) ):EndIf 
+;If mnm=2:DrawText(260+12+30,yraz-yraz/2+35 , "No", RGB((0),(0),(0)) ):EndIf 
   
-DrawingMode(#PB_2DDrawing_Transparent )
-DrawingFont(FontID(0)) 
+;DrawingMode(#PB_2DDrawing_Transparent )
+;DrawingFont(FontID(0)) 
 
-DrawText(265,yraz-yraz/2+5 , "End turn ? ", RGB((255),(200),(100)) )
-DrawingFont(FontID(1)) 
-DrawText(257,yraz-yraz/2+35 , "Yes", RGB((255),(200),(100)) )
-DrawText(260+33,yraz-yraz/2+35 , "/", RGB((255),(200),(100)) )
-DrawText(260+12+30,yraz-yraz/2+35 , "No", RGB((255),(200),(100)) )
-EndIf 
+;DrawText(265,yraz-yraz/2+5 , "End turn ? ", RGB((255),(200),(100)) )
+;DrawingFont(FontID(1)) 
+;DrawText(257,yraz-yraz/2+35 , "Yes", RGB((255),(200),(100)) )
+;DrawText(260+33,yraz-yraz/2+35 , "/", RGB((255),(200),(100)) )
+;DrawText(260+12+30,yraz-yraz/2+35 , "No", RGB((255),(200),(100)) )
+;EndIf 
 
   StopDrawing() 
 
@@ -7523,7 +8719,11 @@ EndIf
 
 
 If fon=0:
+If mods=1
+LoadSprite (119, "mods/"+MORE$+"/TMoD/fon1.png" )
+Else
 LoadSprite (119, "fon/fon1.png" )
+EndIf
 LoadSprite (33, "sprite/107.png" )
 LoadSprite (34, "sprite/108.png" )
 LoadSprite (35, "sprite/109.png" )
@@ -7543,9 +8743,17 @@ LoadSprite (122, "sprite/1063b.png" )
 
 LoadSprite (281, "sprite/63.png" )
 LoadSprite (282, "sprite/64.png" )
+If mods=1
+LoadSprite (32, "mods/"+MORE$+"/TMoD/8bb.png" )
+Else
 LoadSprite (32, "sprite/8bb.png" )
+EndIf
 LoadSprite (283, "fon/fon1a.png" )
+If mods=1 And ReadFile (0, "mods/"+MORE$+"/TMoD/fon1.png" )
+LoadSprite (280, "mods/"+MORE$+"/TMoD/fon1.png" )
+Else
 LoadSprite (280, "fon/1.png" )
+EndIf
 LoadSprite (54, "sprite/54.png" )
 EndIf 
 
@@ -7592,7 +8800,12 @@ LoadSprite (43, "sprite/117.png" )
 LoadSprite (32, "sprite/8bb2.png" )
 LoadSprite (281, "sprite/632.png" )
 LoadSprite (282, "sprite/642.png" )
+
+;If mods=1
+;LoadSprite (122, "mods"+MODNAME+"sprite/1062.png" )
+;Else
 LoadSprite (122, "sprite/1062.png" )
+;EndIf
 LoadSprite (119, "fon/fon3.png" )
 LoadSprite (136, "sprite/200.png" )
 LoadSprite (137, "sprite/201.png" )
@@ -10105,11 +11318,11 @@ DisplayTransparentSprite(1010, 200, yraz-yraz/2-100)
 
 DisplayTransparentSprite(1100+dis2, 200+32, yraz-yraz/2-72)
 DisplayTransparentSprite(1100+dis, 200+128, yraz-yraz/2-72)
-
+;--ПРАВКА_0001
 rt=-48
- If yraz=486:rt=-40:EndIf 
- If yraz=600:rt=-95:EndIf 
- If yraz=720:rt=-158:EndIf 
+ If yraz=720:rt=-40:EndIf 
+ If yraz=1080:rt=-95:EndIf 
+ If yraz=900:rt=-158:EndIf 
  
 If xm3>200+128 And xm3<200+32+128 And ym3>yraz-yraz/2-72 And ym3<yraz-yraz/2-72+32
 DisplayTransparentSprite (7, 200+128-2, yraz-yraz/2-72-2):
@@ -10250,9 +11463,9 @@ Return
 
 
 umenie2:
-If yraz=486:rt=-40:EndIf 
-If yraz=600:rt=-40-57:EndIf 
-If yraz=720:rt=-40-57-60:EndIf 
+If yraz=720:rt=-40:EndIf 
+If yraz=1080:rt=-40-57:EndIf 
+If yraz=900:rt=-40-57-60:EndIf 
 If dis2=0:Goto umenie31:EndIf 
 If dis2=1:Goto umenie32:EndIf 
 If dis2=2:Goto umenie33:EndIf 
@@ -10262,9 +11475,9 @@ If dis2=5:Goto umenie36:EndIf
 If dis2=6:Goto umenie37:EndIf 
 Return 
 umenie:
-If yraz=486:rt=-40:EndIf 
-If yraz=600:rt=-40-57:EndIf 
-If yraz=720:rt=-40-57-60:EndIf 
+If yraz=720:rt=-40:EndIf 
+If yraz=1080:rt=-40-57:EndIf 
+If yraz=900:rt=-40-57-60:EndIf 
 If dis=0:Goto umenie31:EndIf 
 If dis=1:Goto umenie32:EndIf 
 If dis=2:Goto umenie33:EndIf 
@@ -12196,16 +13409,16 @@ If lang=1
 DrawText(xraz/2-(196/2)+50, yraz/2-(96/2)-50+4+60+4, "Collect prizes?", RGB((255),(255),(255)) )
 EndIf 
 DrawingFont(FontID(1)) 
-If lang=0
-DrawText(xraz/2-(196/2)+85-40, yraz/2-(96/2)-16 , "Да", RGB((255),(200),(100)) )
+;If lang=0
+DrawText(xraz/2-(196/2)+85-40, yraz/2-(96/2)-16 , YES$, RGB((255),(200),(100)) )
 
-DrawText(xraz/2-(196/2)+85+40, yraz/2-(96/2)-16 , "Нет", RGB((255),(200),(100)) )
-EndIf 
-If lang=1
-DrawText(xraz/2-(196/2)+85-40, yraz/2-(96/2)-16 , "Yes", RGB((255),(200),(100)) )
-
-DrawText(xraz/2-(196/2)+85+40, yraz/2-(96/2)-16 , "No", RGB((255),(200),(100)) )
-EndIf 
+DrawText(xraz/2-(196/2)+85+40, yraz/2-(96/2)-16 , NO$, RGB((255),(200),(100)) )
+;EndIf 
+;If lang=1
+;DrawText(xraz/2-(196/2)+85-40, yraz/2-(96/2)-16 , "Yes", RGB((255),(200),(100)) )
+;
+;DrawText(xraz/2-(196/2)+85+40, yraz/2-(96/2)-16 , "No", RGB((255),(200),(100)) )
+;EndIf 
 DrawingMode(#PB_2DDrawing_XOr )
 If lang=0
 If moun=1:DrawText(xraz/2-(196/2)+85-40, yraz/2-(96/2)-16 , "Да", RGB((255),(200),(100)) ):EndIf 
@@ -12533,6 +13746,8 @@ If lang=0: namee()\name$="Игрок 1":EndIf
   
 ClearScreen (RGB(0, 0, 0))
 
+PlaySound (551, #PB_Sound_Loop ) 
+
 Start3D()
 Sprite3DBlendingMode(2, 6)
 ZoomSprite3D(299, xraz, yraz)
@@ -12546,18 +13761,28 @@ Stop3D()
 DrawingFont(FontID(3)) 
 DrawingMode(#PB_2DDrawing_Transparent )
 
+If ReadFile(0, "mods/"+MORE$+"/mod.dat")
+
+  MOV$ =  Trim(ReadString(0))
+
+  MODV = Val(MOV$)
+
+EndIf
+
+If mods=1
+DrawText(xraz/32-b/2, 10 , MORE$+" v"+Str(MODV), RGB((255),(255),(255)) )
+EndIf
+
 
 If lang=0
 
 
 
 
-
-
 b=TextWidth(Str(xraz)+"x"+Str(yraz))
-DrawText(xraz/2-b/2, 200 ,  Str(xraz)+"x"+Str(yraz), RGB((255),(0),(255)) )
+DrawText(xraz/2-b/2, 200 ,  Str(fov), RGB((255),(0),(255)) )
 b=TextWidth("Разрешение")
-DrawText(xraz/2-b/2, 180 , "Разрешение", RGB((255),(255),(255)) )
+DrawText(xraz/2-b/2, 180 , "Размер", RGB((255),(255),(255)) )
 b=TextWidth("Esc - выход из игры")
 DrawText(xraz/2-b/2, 240 , "Esc - выход из игры", RGB((255),(255),(255)) )
 b=TextWidth("M - вход в магазин")
@@ -12593,11 +13818,10 @@ If lang=1
 
 
 
-
 b=TextWidth(Str(xraz)+"x"+Str(yraz))
-DrawText(xraz/2-b/2, 200 ,  Str(xraz)+"x"+Str(yraz), RGB((255),(0),(255)) )
+DrawText(xraz/2-b/2, 200 ,  Str(fov), RGB((255),(0),(255)) )
 b=TextWidth("Resolution")
-DrawText(xraz/2-b/2, 180 , "Resolution", RGB((255),(255),(255)) )
+DrawText(xraz/2-b/2, 180 , "Field of View", RGB((255),(255),(255)) )
 b=TextWidth("Esc - Exit")
 DrawText(xraz/2-b/2, 240 , "Esc - Exit", RGB((255),(255),(255)) )
 b=TextWidth("M - Shop")
@@ -12629,11 +13853,25 @@ EndIf
  DisableGadget(1, 1)
   Return 
   
-  
-; jaPBe Version=3.10.3.827
-; Build=0
-; FirstLine=0
-; CursorPosition=25
-; ExecutableFormat=Windows
-; DontSaveDeclare
-; EOF
+ 
+; IDE Options = PureBasic 4.50 (Windows - x86)
+; CursorPosition = 2621
+; FirstLine = 2608
+; Folding = -
+; EnableThread
+; EnableXP
+; UseIcon = favicon (1).ico
+; Executable = G:\Debug.exe
+; CompileSourceDirectory
+; Compiler = PureBasic 4.50 (Windows - x86)
+; IncludeVersionInfo
+; VersionField0 = 1.0.0-alpha
+; VersionField1 = 1.0.0-alpha
+; VersionField2 = Unknown Inc
+; VersionField3 = Otters & Fenech
+; VersionField4 = 1.0.0-alpha
+; VersionField5 = 1.0.0-alpha
+; VersionField6 = Debug Version
+; VersionField9 = Marie Slip
+; VersionField10 = Marie Slip
+; VersionField16 = VFT_APP
